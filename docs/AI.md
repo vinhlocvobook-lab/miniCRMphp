@@ -335,6 +335,12 @@ Nếu gặp lỗi session:
 
 ---
 
+## 🔧 Troubleshooting
+
+Nếu gặp lỗi, xem thêm [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)
+
+---
+
 ## File Paths Summary
 
 ```
@@ -359,3 +365,187 @@ Mini_CRM/
 └── database/
     └── schema.sql                     # DB schema
 ```
+
+---
+
+## ⚠️ Common Pitfalls & How to Avoid Them
+
+### 1. PHP Built-in Server Command
+
+**ALWAYS use `-t public` flag:**
+```bash
+php -S localhost:8000 -t public
+# NOT: php -S localhost:8000
+```
+
+Without `-t public`, static files (CSS/JS) won't load properly.
+
+---
+
+### 2. Static File Paths
+
+**ALWAYS use absolute paths from root:**
+```php
+// ✅ Correct
+<link rel="stylesheet" href="/css/app.css">
+<script src="/js/app.js"></script>
+
+// ❌ Wrong
+<link rel="stylesheet" href="./css/app.css">
+<script src="./js/app.js"></script>
+```
+
+---
+
+### 3. Session Start (CRITICAL!)
+
+**Check session status BEFORE starting:**
+```php
+// config/config.php - MUST have this check
+if (session_status() === PHP_SESSION_NONE) {
+    session_start([
+        'cookie_httponly' => true,
+        'cookie_secure' => false,
+        'cookie_samesite' => 'Strict',
+    ]);
+}
+```
+
+**Rule**: Only call `session_start()` ONCE, in config file only.
+
+---
+
+### 4. Method Signature Compatibility
+
+When overriding methods in child Models, ALWAYS use default values:
+```php
+// Model.php (parent)
+public function delete($id, $userId = null) { ... }
+
+// Child Model - MUST have default value
+public function delete($id, $userId = null) { ... }
+// NOT: public function delete($id, $userId)
+```
+
+---
+
+### 5. Router Parameter Extraction
+
+When using `preg_match` with named groups, filter properly:
+```php
+// ❌ Wrong - $matches has both numeric and named keys
+array_shift($matches);
+
+// ✅ Correct
+$params = array_filter($matches, fn($key) => !is_numeric($key), ARRAY_FILTER_USE_KEY);
+return $this->executeHandler($handler, array_values($params));
+```
+
+---
+
+### 6. Testing API
+
+Always test API with curl first:
+```bash
+# Check if server is running
+curl http://localhost:8000/api/auth/check
+
+# Test login
+curl -X POST http://localhost:8000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@test.com","password":"123"}'
+```
+
+---
+
+### 7. Creating New Model
+
+When creating a new Model that extends Model:
+```php
+// app/Models/ItemModel.php
+<?php
+require_once __DIR__ . '/Model.php';
+
+class ItemModel extends Model {
+    protected $table = 'items';
+
+    // Use default values for user_id if needed
+    public function findByUserId($userId) {
+        $sql = "SELECT * FROM {$this->table} WHERE user_id = ?";
+        return $this->query($sql, [$userId])->fetchAll();
+    }
+
+    // Override delete with default param
+    public function delete($id, $userId = null) {
+        $sql = "DELETE FROM {$this->table} WHERE id = ?";
+        if ($userId !== null) {
+            $sql .= " AND user_id = ?";
+            $this->query($sql, [$id, $userId]);
+        } else {
+            $this->query($sql, [$id]);
+        }
+        return true;
+    }
+}
+```
+
+---
+
+### 8. Creating New Controller
+
+```php
+// app/Controllers/ItemController.php
+<?php
+require_once __DIR__ . '/Controller.php';
+require_once __DIR__ . '/../Models/ItemModel.php';
+
+class ItemController extends Controller {
+    private $itemModel;
+
+    public function __construct() {
+        $this->itemModel = new ItemModel();
+    }
+
+    public function index() {
+        $userId = $this->requireAuth(); // Always require auth!
+        $items = $this->itemModel->findByUserId($userId);
+        $this->success(['items' => $items]);
+    }
+
+    public function show($id) {
+        $userId = $this->requireAuth();
+        $item = $this->itemModel->findByIdAndUserId($id, $userId);
+        if (!$item) {
+            $this->error('Item not found', 404);
+        }
+        $this->success(['item' => $item]);
+    }
+}
+```
+
+---
+
+## 🛠️ Debug Checklist
+
+When something doesn't work:
+
+1. **Server running with `-t public`?**
+2. **Paths are absolute `/css/app.css`?**
+3. **No duplicate `session_start()`?**
+4. **Method signatures have default values?**
+5. **Router params filtered correctly?**
+6. **Browser console (F12) shows errors?**
+7. **PHP errors enabled?** (`error_reporting(E_ALL)`)
+
+---
+
+## 📋 Quick Reference
+
+| Issue | Solution |
+|-------|----------|
+| 404 on `/` | Create `public/index.php`, use `-t public` |
+| CSS/JS not loading | Use `/css/app.css` not `./css/app.css` |
+| Session error | Check `session_status() === PHP_SESSION_NONE` |
+| Method signature error | Add `= null` to overridden params |
+| Router params error | Filter `$matches` with `array_filter` |
+| 500 error | Check PHP error log + browser console |

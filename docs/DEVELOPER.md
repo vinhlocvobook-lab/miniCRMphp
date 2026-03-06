@@ -417,3 +417,64 @@ protected function query($sql, $params = []) {
 console.log('Debug:', data);
 console.error('Error:', err);
 ```
+
+---
+
+## 🚨 Troubleshooting
+
+### PHP Built-in Server
+
+**Luôn dùng `-t public`:**
+```bash
+php -S localhost:8000 -t public
+```
+
+### Static Files Path
+
+**Dùng đường dẫn tuyệt đối:**
+```php
+// ✅ Đúng
+href="/css/app.css"
+
+// ❌ Sai  
+href="./css/app.css"
+```
+
+### Session Error
+
+**Kiểm tra trước khi start:**
+```php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+```
+
+### Method Signature Error
+
+**Thêm default value:**
+```php
+// ❌ Lỗi
+public function delete($id, $userId)
+
+// ✅ Đúng
+public function delete($id, $userId = null)
+```
+
+### Router Params Error
+
+**Lọc $matches đúng cách:**
+```php
+$params = array_filter($matches, fn($key) => !is_numeric($key), ARRAY_FILTER_USE_KEY);
+```
+
+---
+
+## ✅ Checklist Trước Khi Commit Code
+
+- [ ] Server chạy với `-t public`
+- [ ] CSS/JS dùng đường dẫn tuyệt đối `/path`
+- [ ] Không gọi `session_start()` 2 lần
+- [ ] Methods override có default values
+- [ ] Test API với curl trước khi test UI
+- [ ] Không commit `config/config.php`
+- [ ] Kiểm tra browser console (F12)

@@ -8,6 +8,7 @@
 | [DEPLOYMENT.md](./DEPLOYMENT.md) | Hướng dẫn triển khai production |
 | [DEVELOPER.md](./DEVELOPER.md) | Hướng dẫn phát triển cho developers |
 | [AI.md](./AI.md) | Hướng dẫn dành cho AI/LLM |
+| [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) | Xử lý lỗi thường gặp |
 
 ---
 
