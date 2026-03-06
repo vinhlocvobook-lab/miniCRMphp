@@ -1,0 +1,91 @@
+# ===========================================
+# Git Ignore Best Practices for Mini CRM
+# ===========================================
+
+# -----------------------------
+# OS / Editor Files
+# -----------------------------
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+*.sublime-*
+
+# -----------------------------
+# PHP Dependencies
+# -----------------------------
+vendor/
+composer.phar
+composer.lock
+
+# -----------------------------
+# Environment Files (SENSITIVE!)
+# -----------------------------
+.env
+.env.*
+!.env.example
+
+# -----------------------------
+# Logs & Debug
+# -----------------------------
+logs/
+*.log
+*.log.*
+php_errors.log
+error_log
+/app/logs/
+
+# -----------------------------
+# Cache
+# -----------------------------
+/cache/
+/tmp/
+/temp/
+*.cache
+
+# -----------------------------
+# Uploads / Media (if any)
+# -----------------------------
+/uploads/
+/media/
+/assets/uploads/
+
+# -----------------------------
+# Test / Coverage
+# -----------------------------
+.phpunit.cache/
+coverage/
+.phpunit.result.xml
+
+# -----------------------------
+# Build / Dist
+# -----------------------------
+dist/
+build/
+*.min.js
+*.min.css
+
+# -----------------------------
+# Database (never commit!)
+# -----------------------------
+*.sql.gz
+*.bak
+*.sqlite
+*.db
+/database/*.sql
+
+# -----------------------------
+# Private Keys / Secrets
+# -----------------------------
+*.pem
+*.key
+ssl/
+
+# -----------------------------
+# OS Credentials
+# -----------------------------
+.credentials
+credentials.json

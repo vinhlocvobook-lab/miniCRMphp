@@ -1,0 +1,32 @@
+<?php
+// config/config.php.example
+// Copy to config.php and fill in your actual values
+
+// Session configuration
+if (session_status() === PHP_SESSION_NONE) {
+    session_start([
+        'cookie_httponly' => true,
+        'cookie_secure' => false,
+        'cookie_samesite' => 'Strict',
+        'use_strict_mode' => true,
+        'use_cookies' => true,
+    ]);
+}
+
+// Database configuration
+define('DB_HOST', 'localhost');
+define('DB_NAME', 'minicrm');
+define('DB_USER', 'your_db_user');
+define('DB_PASS', 'your_db_password');
+
+// App configuration
+define('APP_NAME', 'Mini CRM');
+define('BASE_URL', '');
+
+// CSRF token generation
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
+// Timezone
+date_default_timezone_set('Asia/Ho_Chi_Minh');
